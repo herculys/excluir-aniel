@@ -8,7 +8,7 @@ from tabulate import tabulate
 # Etapas do processo para a barra de progresso
 with tqdm(total=6, ncols=92) as pbar:
     # 1. Lendo CSV
-    pbar.set_description("Lendo CSV Canceladas Voalle.csv")
+    pbar.set_description("\nLendo CSV Canceladas Voalle.csv")
     try:
         df_csv = pd.read_csv('Excluir Aniel/Canceladas Voalle.csv', sep=';', encoding='utf-8', on_bad_lines='skip')
     except FileNotFoundError:
@@ -24,9 +24,9 @@ with tqdm(total=6, ncols=92) as pbar:
     time.sleep(1)
 
     # 2. Lendo Excel
-    pbar.set_description("Lendo Excluir Aniel/Excel Painel de Serviços.xlsx")
+    pbar.set_description("\nLendo Excluir Aniel/Excel Painel de Serviços.xlsx")
     try:
-        df_xlsx = pd.read_excel('Excluir Aniel/Painel de Serviços.xlsx', engine='openpyxl', header=1)
+        df_xlsx = pd.read_excel('Excluir Aniel/Painel de Serviços.xlsx', engine='openpyxl', header=0)
     except FileNotFoundError:
         print("\n \033[1;31mArquivo 'Excluir Aniel/Painel de Serviços.xlsx' não encontrado.\033[0m \n \033[1;34mCertifique-se de que o nome do arquivo está correto e no mesmo diretório do arquivo CriarExclusão.py\033[0m")
         sys.exit("Encerrando o programa")
@@ -69,7 +69,7 @@ with tqdm(total=6, ncols=92) as pbar:
 
     # 5. Filtrando Status
     pbar.set_description("Filtrando Status")
-    df_final = df_final[~df_final["Status Aniel"].isin(["Fechada Improdutiva", "Fechada Produtiva"])]
+    df_final = df_final[~df_final["Status Aniel"].isin(["Fechada Improdutiva", "Fechada Produtiva","Cancelado"])]
     pbar.update(1)
     time.sleep(1)
 
