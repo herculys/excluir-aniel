@@ -75,6 +75,10 @@ with tqdm(total=6, ncols=92) as pbar:
 
     # 6. Salvando arquivos
     pbar.set_description("Salvando arquivos")
+    
+    # Formatando a coluna Data de Criação para o formato brasileiro DD/MM/AAAA HH:MM:SS
+    df_final['Data de Criação'] = pd.to_datetime(df_final['Data de Criação']).dt.strftime('%d/%m/%Y %H:%M:%S')
+    
     df_final_sem_status = df_final.drop(columns=["Status Voalle", "Status Aniel"])
     df_final_sem_status.to_excel('Excluir Aniel/Excluir_Aniel.xlsx', index=False)
     df_final.to_excel('Excluir Aniel/Excluir_Aniel_com_Status.xlsx', index=False)
