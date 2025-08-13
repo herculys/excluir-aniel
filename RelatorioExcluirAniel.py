@@ -69,6 +69,15 @@ with tqdm(total=6, ncols=92) as pbar:
 
     # 5. Filtrando Status
     pbar.set_description("Filtrando Status")
+    
+    # Primeiro, criar arquivo específico antes de aplicar filtros
+    # Formatando a coluna Data de Criação para o formato brasileiro DD/MM/AAAA HH:MM:SS
+    df_final['Data de Criação'] = pd.to_datetime(df_final['Data de Criação']).dt.strftime('%d/%m/%Y %H:%M:%S')
+    
+    # Criando DataFrame para registros com Status Voalle = "Cancelado" E Status Aniel = "Fechada Produtiva"
+    df_cancelado_fechada = df_final[(df_final["Status Voalle"] == " Cancelado") & (df_final["Status Aniel"] == "Fechada Produtiva")]
+    
+    # Aplicando filtro principal para remover status indesejados
     df_final = df_final[~df_final["Status Aniel"].isin(["Fechada Improdutiva", "Fechada Produtiva","Cancelado"])]
     pbar.update(1)
     time.sleep(1)
@@ -76,15 +85,17 @@ with tqdm(total=6, ncols=92) as pbar:
     # 6. Salvando arquivos
     pbar.set_description("Salvando arquivos")
     
-    # Formatando a coluna Data de Criação para o formato brasileiro DD/MM/AAAA HH:MM:SS
-    df_final['Data de Criação'] = pd.to_datetime(df_final['Data de Criação']).dt.strftime('%d/%m/%Y %H:%M:%S')
-    
     df_final_sem_status = df_final.drop(columns=["Status Voalle", "Status Aniel"])
-    df_final_sem_status.to_excel('Excluir Aniel/Excluir_Aniel.xlsx', index=False)
-    df_final.to_excel('Excluir Aniel/Excluir_Aniel_com_Status.xlsx', index=False)
+    df_final_sem_status.to_excel('Excluir Aniel/Exclusão/Excluir_Aniel.xlsx', index=False)
+    df_final.to_excel('Excluir Aniel/Exclusão/Excluir_Aniel_com_Status.xlsx', index=False)
+    df_cancelado_fechada.to_excel('Excluir Aniel/Exclusão/Cancelado-Voalle_Fechada_Produtiva-Aniel.xlsx', index=False)
     pbar.update(1)
     time.sleep(1)
 
 print(tabulate(df_final_sem_status.head(), headers='keys', tablefmt='psql', showindex=False))
-print("Mesclagem filtrada e salva em 'Excluir Aniel.xlsx' e 'Excluir Aniel com status.xlsx'. ✅✅✅✅")
+print("Mesclagem filtrada e salva em:")
+print("- 'Excluir_Aniel.xlsx' (sem status)")
+print("- 'Excluir_Aniel_com_Status.xlsx' (com status filtrado)")
+print("- 'Cancelado_Fechada_Produtiva.xlsx' (Status Voalle=Cancelado E Status Aniel=Fechada Produtiva)")
+print("✅✅✅✅")
 
