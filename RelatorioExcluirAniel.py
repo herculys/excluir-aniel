@@ -2,6 +2,7 @@ import pandas as pd
 from tqdm import tqdm
 import time
 import sys
+import os
 from tabulate import tabulate
 
 # -*- coding: utf-8 -*-
@@ -84,6 +85,10 @@ with tqdm(total=6, ncols=92) as pbar:
 
     # 6. Salvando arquivos
     pbar.set_description("Salvando arquivos")
+    
+    # Criando diretório se não existir
+    output_dir = 'Excluir Aniel/Exclusão'
+    os.makedirs(output_dir, exist_ok=True)
     
     df_final_sem_status = df_final.drop(columns=["Status Voalle", "Status Aniel"])
     df_final_sem_status.to_excel('Excluir Aniel/Exclusão/Excluir_Aniel.xlsx', index=False)
