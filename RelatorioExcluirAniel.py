@@ -27,7 +27,7 @@ with tqdm(total=6, ncols=92) as pbar:
     # 2. Lendo Excel
     pbar.set_description("\nLendo Excluir Aniel/Excel Painel de Serviços.xlsx")
     try:
-        df_xlsx = pd.read_excel('Excluir Aniel/Painel de Serviços.xlsx', engine='openpyxl', header=0)
+        df_xlsx = pd.read_excel('Excluir Aniel/Painel de Serviços.xlsx', engine='openpyxl', header=1)
     except FileNotFoundError:
         print("\n \033[1;31mArquivo 'Excluir Aniel/Painel de Serviços.xlsx' não encontrado.\033[0m \n \033[1;34mCertifique-se de que o nome do arquivo está correto e no mesmo diretório do arquivo CriarExclusão.py\033[0m")
         sys.exit("Encerrando o programa")
