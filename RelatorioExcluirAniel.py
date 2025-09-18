@@ -76,6 +76,7 @@ with tqdm(total=6, ncols=92) as pbar:
     df_final['Data de Criação'] = pd.to_datetime(df_final['Data de Criação']).dt.strftime('%d/%m/%Y %H:%M:%S')
     
     # Criando DataFrame para registros com Status Voalle = "Cancelado" E Status Aniel = "Fechada Produtiva"
+
     df_cancelado_fechada = df_final[(df_final["Status Voalle"] == " Cancelado") & (df_final["Status Aniel"] == "Fechada Produtiva")]
     
     # Aplicando filtro principal para remover status indesejados
