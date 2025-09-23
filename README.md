@@ -2,9 +2,39 @@
 
 Este projeto contém um script Python para processar e mesclar dados de cancelamentos do sistema Voalle com dados do painel de serviços do sistema Aniel, gerando relatórios filtrados para exclusão.
 
+## � Ambiente Virtual
+
+**IMPORTANTE:** Este projeto agora está configurado com um ambiente virtual Python para isolar as dependências.
+
+### Dependências Instaladas:
+- pandas - Manipulação de dados
+- tqdm - Barra de progresso
+- openpyxl - Leitura/escrita de arquivos Excel
+- tabulate - Formatação de tabelas
+- numpy - Operações numéricas
+
+### Como Executar:
+
+#### Método 1: Script Automático (PowerShell)
+```powershell
+.\executar.ps1
+```
+
+#### Método 2: Script Batch (CMD)
+```cmd
+ativar_venv.bat
+python Exclusao.py
+```
+
+#### Método 3: Manual
+```powershell
+.\venv\Scripts\Activate.ps1
+python Exclusao.py
+```
+
 ## 📋 Descrição
 
-O script `RelatorioExcluirAniel.py` automatiza o processo de:
+O script `Exclusao.py` automatiza o processo de:
 - Leitura de dados de cancelamentos do Voalle (CSV)
 - Leitura de dados do painel de serviços do Aniel (Excel)
 - Mesclagem dos dados baseada no número do protocolo/ordem de serviço

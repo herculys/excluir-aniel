@@ -4,10 +4,57 @@ import time
 import sys
 import os
 from tabulate import tabulate
+import re
+from datetime import datetime
+import glob
 
 # -*- coding: utf-8 -*-
+# Configurar codificação para evitar problemas no Windows
+if sys.platform.startswith('win'):
+    import locale
+    try:
+        locale.setlocale(locale.LC_ALL, 'Portuguese_Brazil.1252')
+    except:
+        pass
+
 # Limpar o terminal para uma visualização limpa
 os.system('cls' if os.name == 'nt' else 'clear')
+
+def get_next_exclusao_folder():
+    """
+    Encontra o próximo número sequencial para a pasta Exclusão e retorna
+    o nome da pasta com data no formato: Exclusão XX - DD-MM-AAAA
+    """
+    base_dir = 'Excluir Aniel'
+    
+    # Verificar se o diretório base existe
+    if not os.path.exists(base_dir):
+        return f'{base_dir}/Exclusão 01 - {datetime.now().strftime("%d-%m-%Y")}'
+    
+    # Buscar todas as pastas que começam com "Exclusão"
+    pattern = os.path.join(base_dir, 'Exclusão*')
+    existing_folders = glob.glob(pattern)
+    
+    # Extrair números das pastas existentes
+    numbers = []
+    for folder in existing_folders:
+        folder_name = os.path.basename(folder)
+        # Buscar padrão "Exclusão XX" onde XX é um número
+        match = re.search(r'Exclusão\s+(\d+)', folder_name)
+        if match:
+            numbers.append(int(match.group(1)))
+    
+    # Determinar o próximo número
+    if numbers:
+        next_number = max(numbers) + 1
+    else:
+        next_number = 1
+    
+    # Formatear o nome da pasta com data atual
+    current_date = datetime.now().strftime("%d-%m-%Y")
+    folder_name = f'Exclusão {next_number:02d} - {current_date}'
+    
+    return os.path.join(base_dir, folder_name)
 
 # Etapas do processo para a barra de progresso
 with tqdm(total=6, ncols=92, desc="Processando", leave=True, dynamic_ncols=False) as pbar:
@@ -129,9 +176,13 @@ with tqdm(total=6, ncols=92, desc="Processando", leave=True, dynamic_ncols=False
     # 6. Salvando arquivos
     pbar.set_description("Salvando arquivos")
     
-    # Criando diretório se não existir
-    output_dir = 'Excluir Aniel/Exclusão'
+    # Criando diretório sequencial com data
+    output_dir = get_next_exclusao_folder()
     os.makedirs(output_dir, exist_ok=True)
+    
+    # Mostrar qual pasta foi criada
+    folder_name = os.path.basename(output_dir)
+    print(f"\n📁 Criada pasta: {folder_name}")
     
     df_final_sem_status = df_final.drop(columns=["Status Voalle", "Status Aniel", "Tipo Solicitação", "Tipo de Serviço"])
     df_final_sem_status.to_excel(f'{output_dir}/Excluir_Aniel.xlsx', index=False)
@@ -145,7 +196,7 @@ print(f"\n📊 Resumo dos resultados:")
 print(f"- Total de registros processados: {len(df_final)}")
 print(f"- Registros para exclusão: {len(df_final_sem_status)}")
 print(f"- Registros cancelados/fechados: {len(df_cancelado_fechada)}")
-print("\n📁 Arquivos salvos em 'Excluir Aniel/Exclusão/':")
+print(f"\n📁 Arquivos salvos em '{output_dir}':")
 print("- 'Excluir_Aniel.xlsx' (sem status)")
 print("- 'Excluir_Aniel_com_Status.xlsx' (com status filtrado)")
 print("- 'Cancelado-Voalle_Fechada_Produtiva-Aniel.xlsx' (Status Voalle = CANCELADO E Status Aniel = Fechada Improdutiva/Produtiva)")
