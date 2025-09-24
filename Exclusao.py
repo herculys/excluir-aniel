@@ -166,6 +166,11 @@ with tqdm(total=6, ncols=92, desc="Processando", leave=True, dynamic_ncols=False
     # Criando DataFrame para registros com Status Voalle = "CANCELADO" E Status Aniel = "Fechada Improdutiva" ou "Fechada Produtiva"
     df_cancelado_fechada = df_final[(df_final["Status Voalle"] == "CANCELADO") & (df_final["Status Aniel"].isin(["Fechada Improdutiva", "Fechada Produtiva"]))]
     
+    # Manter na planilha Excluir_Aniel apenas Status Voalle desejados
+    # Aceitar variações de caixa (Cancelado/cancelado/CANCELADO, etc.)
+    allowed_voalle = {"CANCELADO", "FECHAMENTO", "ENCERRAMENTO"}
+    df_final = df_final[df_final["Status Voalle"].astype(str).str.strip().str.upper().isin(allowed_voalle)]
+    
     # Aplicando filtro principal - manter apenas registros que precisam de ação
     # Remover status que indicam conclusão ou não precisam de intervenção
     df_final = df_final[~df_final["Status Aniel"].isin(["Fechada Improdutiva", "Fechada Produtiva", "Cancelado"])]
