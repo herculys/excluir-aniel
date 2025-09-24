@@ -7,6 +7,7 @@ from tabulate import tabulate
 import re
 from datetime import datetime
 import glob
+import shutil
 
 # -*- coding: utf-8 -*-
 # Configurar codificação para evitar problemas no Windows
@@ -59,17 +60,17 @@ def get_next_exclusao_folder():
 # Etapas do processo para a barra de progresso
 with tqdm(total=6, ncols=92, desc="Processando", leave=True, dynamic_ncols=False) as pbar:
     # 1. Lendo CSV
-    pbar.set_description("Lendo CSV Canceladas Voalle")
+    pbar.set_description("Lendo CSV QTD Solicitações")
     try:
-        df_csv = pd.read_csv('Excluir Aniel/Canceladas Voalle.csv', sep=',', encoding='utf-8', on_bad_lines='skip')
+        df_csv = pd.read_csv('Excluir Aniel/QTD Solicitações _ Recolhimento.csv', sep=',', encoding='utf-8', on_bad_lines='skip')
     except FileNotFoundError:
-        print("\n \033[1;31mArquivo 'Excluir Aniel/Canceladas Voalle.csv' não encontrado.\033[0m \n \033[1;34mCertifique-se de que o arquivo está no diretório 'Excluir Aniel'\033[0m")
+        print("\n \033[1;31mArquivo 'Excluir Aniel/QTD Solicitações _ Recolhimento.csv' não encontrado.\033[0m \n \033[1;34mCertifique-se de que o arquivo está no diretório 'Excluir Aniel'\033[0m")
         sys.exit("Encerrando o programa")
     except Exception as e:
         try:
-            df_csv = pd.read_csv('Excluir Aniel/Canceladas Voalle.csv', sep=',', encoding='latin1', on_bad_lines='skip')
+            df_csv = pd.read_csv('Excluir Aniel/QTD Solicitações _ Recolhimento.csv', sep=',', encoding='latin1', on_bad_lines='skip')
         except FileNotFoundError:
-            print("\n \033[1;31mArquivo 'Excluir Aniel/Canceladas Voalle.csv' não encontrado.\033[0m \n \033[1;34mCertifique-se de que o arquivo está no diretório 'Excluir Aniel'\033[0m")
+            print("\n \033[1;31mArquivo 'Excluir Aniel/QTD Solicitações _ Recolhimento.csv' não encontrado.\033[0m \n \033[1;34mCertifique-se de que o arquivo está no diretório 'Excluir Aniel'\033[0m")
             sys.exit("Encerrando o programa")
         except Exception as e2:
             print(f"\n \033[1;31mErro ao ler arquivo CSV: {e2}\033[0m")
@@ -101,14 +102,14 @@ with tqdm(total=6, ncols=92, desc="Processando", leave=True, dynamic_ncols=False
         
         # Ler e combinar todos os arquivos Excel encontrados
         dataframes_excel = []
+        excel_counts = {}
         for file_path in recolhimento_files:
             df_temp = pd.read_excel(file_path, engine='openpyxl', header=1)
             dataframes_excel.append(df_temp)
-            print(f"  → Carregado: {file_path} ({len(df_temp)} registros)")
-        
+            # Armazena a contagem de protocolos de cada arquivo Excel
+            excel_counts[os.path.basename(file_path)] = df_temp['Nº. Ordem Serviço'].count() if 'Nº. Ordem Serviço' in df_temp.columns else len(df_temp)
         # Combinar todos os DataFrames
         df_xlsx = pd.concat(dataframes_excel, ignore_index=True)
-        print(f"  → Total combinado: {len(df_xlsx)} registros")
         
     except FileNotFoundError as e:
         print(f"\n \033[1;31m{e}\033[0m \n \033[1;34mCertifique-se de que os arquivos estão no diretório 'Excluir Aniel'\033[0m")
@@ -180,25 +181,57 @@ with tqdm(total=6, ncols=92, desc="Processando", leave=True, dynamic_ncols=False
     output_dir = get_next_exclusao_folder()
     os.makedirs(output_dir, exist_ok=True)
     
-    # Mostrar qual pasta foi criada
-    folder_name = os.path.basename(output_dir)
-    print(f"\n📁 Criada pasta: {folder_name}")
-    
     df_final_sem_status = df_final.drop(columns=["Status Voalle", "Status Aniel", "Tipo Solicitação", "Tipo de Serviço"])
     df_final_sem_status.to_excel(f'{output_dir}/Excluir_Aniel.xlsx', index=False)
     df_final.to_excel(f'{output_dir}/Excluir_Aniel_com_Status.xlsx', index=False)
     df_cancelado_fechada.to_excel(f'{output_dir}/Cancelado-Voalle_Fechada_Produtiva-Aniel.xlsx', index=False)
+    
+    # Criar pasta Source e mover arquivos originais
+    source_dir = os.path.join(output_dir, 'Source')
+    os.makedirs(source_dir, exist_ok=True)
+    
+    # Mover arquivo CSV para a pasta Source
+    csv_source = 'Excluir Aniel/QTD Solicitações _ Recolhimento.csv'
+    csv_destination = os.path.join(source_dir, 'QTD Solicitações _ Recolhimento.csv')
+    
+    if os.path.exists(csv_source):
+        shutil.move(csv_source, csv_destination)
+    
+    # Mover arquivos Excel para a pasta Source
+    excel_files_to_move = [
+        'Excluir Aniel/RECOLHIMENTO.xlsx',
+        'Excluir Aniel/RECOLHIMENTO AGENDADO.xlsx'
+    ]
+    
+    for excel_file in excel_files_to_move:
+        if os.path.exists(excel_file):
+            filename = os.path.basename(excel_file)
+            excel_destination = os.path.join(source_dir, filename)
+            shutil.move(excel_file, excel_destination)
+    
     pbar.update(1)
     time.sleep(0.5)
 
 print(tabulate(df_final_sem_status.head(), headers='keys', tablefmt='psql', showindex=False))
-print(f"\n📊 Resumo dos resultados:")
-print(f"- Total de registros processados: {len(df_final)}")
-print(f"- Registros para exclusão: {len(df_final_sem_status)}")
-print(f"- Registros cancelados/fechados: {len(df_cancelado_fechada)}")
+
+# Mostrar qual pasta foi criada após o processamento
+folder_name = os.path.basename(output_dir)
+print(f"\n📁 Criada pasta: {folder_name}")
+
+# RESUMO DETALHADO FINAL
+print("\n=== RESUMO DETALHADO DOS DADOS ===")
+print(f"- Protocolos no CSV (ID Protocolo | Proxxima): {df_csv['ID Protocolo | Proxxima'].count() if 'ID Protocolo | Proxxima' in df_csv.columns else len(df_csv)}")
+for fname, count in excel_counts.items():
+    print(f"- Protocolos no arquivo {fname} (Nº. Ordem Serviço): {count}")
+total_excel = sum(excel_counts.values())
+print(f"- Total combinado (RECOLHIMENTO.xlsx + RECOLHIMENTO AGENDADO.xlsx): {total_excel}")
+print(f"- Protocolos enviados para a planilha Excluir Aniel: {len(df_final_sem_status)}")
+
 print(f"\n📁 Arquivos salvos em '{output_dir}':")
 print("- 'Excluir_Aniel.xlsx' (sem status)")
 print("- 'Excluir_Aniel_com_Status.xlsx' (com status filtrado)")
 print("- 'Cancelado-Voalle_Fechada_Produtiva-Aniel.xlsx' (Status Voalle = CANCELADO E Status Aniel = Fechada Improdutiva/Produtiva)")
-print("✅✅✅✅")
-
+print("\n📂 Arquivos originais movidos para 'Source/':")
+print("- 'QTD Solicitações _ Recolhimento.csv' (arquivo CSV original)")
+print("- 'RECOLHIMENTO.xlsx' (arquivo Excel original)")
+print("- 'RECOLHIMENTO AGENDADO.xlsx' (arquivo Excel original)")
