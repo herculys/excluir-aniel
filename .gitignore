@@ -3,8 +3,8 @@ __pycache__/
 *.py[cod]
 
 # Ignora ambientes virtuais comuns
-#venv/
-#.env/
+venv/
+.env/
 
 # Ignora pasta src caso volte a existir
 Excluir Aniel/
