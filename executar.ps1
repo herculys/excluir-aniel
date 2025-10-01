@@ -1,14 +1,29 @@
-# Script para executar diretamente o programa principal
-# Change to script directory (same folder as this script)
+# Script para executar o programa usando apenas o ambiente virtual (venv)
+# Muda para o diretório do script
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 
-# Activate virtual environment
-& .\venv\Scripts\Activate.ps1
+Write-Host "Ativando ambiente virtual..." -ForegroundColor Yellow
 
-# Run the main script
-& python Exclusao.py
+# Ativar ambiente virtual
+try {
+    & .\venv\Scripts\Activate.ps1
+    Write-Host "Ambiente virtual ativado com sucesso!" -ForegroundColor Green
+} catch {
+    Write-Host "Erro ao ativar ambiente virtual: $_" -ForegroundColor Red
+    Read-Host "Pressione Enter para sair"
+    exit 1
+}
 
-# Keep the window open to see results
-Write-Host "Pressione qualquer tecla para continuar..."
+Write-Host "Executando Exclusao.py..." -ForegroundColor Cyan
+
+# Executar script usando Python do venv
+try {
+    & .\venv\Scripts\python.exe Exclusao.py
+} catch {
+    Write-Host "Erro ao executar o script: $_" -ForegroundColor Red
+}
+
+Write-Host "`nExecução concluída!" -ForegroundColor Green
+Write-Host "Pressione qualquer tecla para fechar..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
