@@ -91,6 +91,9 @@ with tqdm(total=6, ncols=92, desc="Processando", leave=True, dynamic_ncols=False
         if os.path.exists('Excluir Aniel/RECOLHIMENTO AGENDADO.xlsx'):
             recolhimento_files.append('Excluir Aniel/RECOLHIMENTO AGENDADO.xlsx')
         
+        if os.path.exists('Excluir Aniel/RECOLHIMENTO RÁDIO.xlsx'):
+            recolhimento_files.append('Excluir Aniel/RECOLHIMENTO RÁDIO.xlsx')
+        
         # Se não encontrar os novos arquivos, buscar o antigo formato
         if not recolhimento_files:
             excel_files = [f for f in os.listdir('Excluir Aniel') if f.endswith('.xlsx') and 'Painel' in f]
@@ -205,7 +208,8 @@ with tqdm(total=6, ncols=92, desc="Processando", leave=True, dynamic_ncols=False
     # Mover arquivos Excel para a pasta Source
     excel_files_to_move = [
         'Excluir Aniel/RECOLHIMENTO.xlsx',
-        'Excluir Aniel/RECOLHIMENTO AGENDADO.xlsx'
+        'Excluir Aniel/RECOLHIMENTO AGENDADO.xlsx',
+        'Excluir Aniel/RECOLHIMENTO RÁDIO.xlsx'
     ]
     
     for excel_file in excel_files_to_move:
@@ -229,7 +233,7 @@ print(f"- Protocolos no CSV (ID Protocolo | Proxxima): {df_csv['ID Protocolo | P
 for fname, count in excel_counts.items():
     print(f"- Protocolos no arquivo {fname} (Nº. Ordem Serviço): {count}")
 total_excel = sum(excel_counts.values())
-print(f"- Total combinado (RECOLHIMENTO.xlsx + RECOLHIMENTO AGENDADO.xlsx): {total_excel}")
+print(f"- Total combinado (RECOLHIMENTO.xlsx + RECOLHIMENTO AGENDADO.xlsx + RECOLHIMENTO RÁDIO.xlsx): {total_excel}")
 print(f"- Protocolos enviados para a planilha Excluir Aniel: {len(df_final_sem_status)}")
 
 print(f"\n📁 Arquivos salvos em '{output_dir}':")
@@ -240,3 +244,4 @@ print("\n📂 Arquivos originais movidos para 'Source/':")
 print("- 'QTD Solicitações _ Recolhimento.csv' (arquivo CSV original)")
 print("- 'RECOLHIMENTO.xlsx' (arquivo Excel original)")
 print("- 'RECOLHIMENTO AGENDADO.xlsx' (arquivo Excel original)")
+print("- 'RECOLHIMENTO RÁDIO.xlsx' (arquivo Excel original)")
